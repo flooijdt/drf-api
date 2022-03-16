@@ -41,3 +41,4 @@ class AgendamentoSerializer(serializers.ModelSerializer):
     #     instance.telefone_cliente = validated_data.get("telefone_cliente", instance.telefone_cliente)
     #     instance.save()
     #     return instance
+    # .
