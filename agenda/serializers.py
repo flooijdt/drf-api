@@ -44,7 +44,7 @@ class AgendamentoSerializer(serializers.ModelSerializer):
         if email_cliente.endswith(".br") and telefone_cliente.startswith("+") and not telefone_cliente.startswith("+55"):
             raise serializers.ValidationError("Email brasileiro deve estar associado a um numero brasileiro (+55)")
         
-        if data_horario.date() in Agendamento.objects.filter(email_cliente=email_cliente).dates("data_horario", 'day'):# o ideal seria iterar pelos objetos com email igual e verificar se a data_horario.date() coincide
+        if data_horario in Agendamento.objects.filter(email_cliente=email_cliente).dates("data_horario", 'day'):# o ideal seria iterar pelos objetos com email igual e verificar se a data_horario.date() coincide
             raise serializers.ValidationError("Não se pode fazer mais de um agendamento diário.")
         
         return attrs
