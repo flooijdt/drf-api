@@ -1,20 +1,42 @@
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
 from agenda.models import Agendamento
-from agenda.serializers import AgendamentoSerializer
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import mixins, generics
+from agenda.serializers import AgendamentoSerializer, PrestadorSerializer
+from rest_framework import generics, permissions
 # Create your views here.
 
-class AgendamentoDetail(generics.RetrieveUpdateDestroyAPIView):#/api/agendamentos/pk/
-    queryset = Agendamento.objects.all()
-    serializer_class = AgendamentoSerializer
+class IsOwnerOrCreateOnly(permissions.BasePermission):# /api/agendamentos/?username=flooijdt
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return True
+        username = request.query_params.get("username", None)
+        if request.user.username == username:
+            return True
+        return False
+
+class IsPrestador(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if obj.prestador == request.user:
+            return True
+        return False
 
 class AgendamentoList(generics.ListCreateAPIView):#/api/agendamentos/
-    queryset = Agendamento.objects.all()
     serializer_class = AgendamentoSerializer
+    permission_classes = [IsOwnerOrCreateOnly]
+    
+    def get_queryset(self):
+        username = self.request.query_params.get("username", None)
+        queryset = Agendamento.objects.filter(prestador__username=username)
+        return queryset
+
+class AgendamentoDetail(generics.RetrieveUpdateDestroyAPIView):#/api/agendamentos/?username=flooijdt
+   permission_classes = [IsPrestador]
+   queryset = Agendamento.objects.all()
+   serializer_class = AgendamentoSerializer
+#    permission_classes = [IsOwnerOrCreateOnly]
+
+class PrestadorList(generics.ListAPIView):
+    serializer_class = PrestadorSerializer
+    queryset = User.objects.all()
 
 # @api_view(http_method_names=["GET", "PATCH", "DELETE"])
 # def agendamento_detail(request, id):
