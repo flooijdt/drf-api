@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from datetime import timedelta, date
+from datetime import timedelta, datetime, date
 from rest_framework import serializers
 from django.utils import timezone
 from agenda.models import Agendamento
@@ -39,26 +39,35 @@ class AgendamentoSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("O sinal de '+' apenas pode ser utilizado no começo do número de telefone.")
         return value
 
-    def validate_data_horario(self, value):
-        for i in Agendamento.objects.all().datetimes("data_horario", "minute"):
-            if abs(value - i) < timedelta(weeks=0, days=0, hours=0, minutes=30):
-                print(value - i)
-                raise serializers.ValidationError("Já existem outros agendamentos neste horário. Escolha outro horário.")
-        if value.minute is not 0 and value.minute is not 30:
-            raise serializers.ValidationError("não são permitidos horários quebrados.")
-        return value
+    # def validate_data_horario(self, value):
+    #     for i in Agendamento.objects.all().datetimes("data_horario", "minute"):
+    #         if abs(value - i) < timedelta(weeks=0, days=0, hours=0, minutes=30):
+    #             print(value - i)
+    #             raise serializers.ValidationError("Já existem outros agendamentos neste horário. Escolha outro horário.")
+    #     if value.minute != 0 and value.minute != 30:
+    #         raise serializers.ValidationError("não são permitidos horários quebrados.")
+    #     return value
      
     def validate(self, attrs):
         telefone_cliente = attrs.get("telefone_cliente", "")
         email_cliente = attrs.get("email_cliente", "")
         data_horario = attrs.get("data_horario", "")
+        confirmado = ("confirmado", "")
 
         if email_cliente.endswith(".br") and telefone_cliente.startswith("+") and not telefone_cliente.startswith("+55"):
             raise serializers.ValidationError("Email brasileiro deve estar associado a um numero brasileiro (+55)")
-        
-        if data_horario.date() in Agendamento.objects.filter(email_cliente=email_cliente).dates("data_horario", 'day'):# o ideal seria iterar pelos objetos com email igual e verificar se a data_horario.date() coincide
+        if data_horario.date() in Agendamento.objects.filter(email_cliente=email_cliente, confirmado=True).dates("data_horario", 'day'):# o ideal seria iterar pelos objetos com email igual e verificar se a data_horario.date() coincide
             raise serializers.ValidationError("Não se pode fazer mais de um agendamento diário.")
         
+        for i in Agendamento.objects.all().datetimes("data_horario", "minute"):
+            if abs(data_horario - i) < timedelta(weeks=0, days=0, hours=0, minutes=30) and confirmado == True:
+                print(data_horario - i)
+                raise serializers.ValidationError("Já existem outros agendamentos neste horário. Escolha outro horário.")
+        if data_horario.minute != 0 and data_horario.minute != 30:
+            raise serializers.ValidationError("não são permitidos horários quebrados.")
+ 
+
+
         return attrs
 
 class PrestadorSerializer(serializers.ModelSerializer):
@@ -67,6 +76,7 @@ class PrestadorSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "agendamentos"]
 
     agendamentos = AgendamentoSerializer(many=True, read_only=True)
+
     # def create(self, validated_data):
     #     agendamento = Agendamento.objects.create(
     #         data_horario = validated_data["data_horario"],

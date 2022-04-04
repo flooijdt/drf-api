@@ -25,7 +25,8 @@ class AgendamentoList(generics.ListCreateAPIView):#/api/agendamentos/
     
     def get_queryset(self):
         username = self.request.query_params.get("username", None)
-        queryset = Agendamento.objects.filter(prestador__username=username)
+        confirmado = self.request.query_params.get("confirmado", None)
+        queryset = Agendamento.objects.filter(prestador__username=username, confirmado=confirmado)
         return queryset
 
 class AgendamentoDetail(generics.RetrieveUpdateDestroyAPIView):#/api/agendamentos/?username=flooijdt
