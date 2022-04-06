@@ -9,14 +9,19 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('agenda', '0002_agendamento_cancelado'),
+        ("agenda", "0002_agendamento_cancelado"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='agendamento',
-            name='prestador',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='agendamentos', to=settings.AUTH_USER_MODEL),
+            model_name="agendamento",
+            name="prestador",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="agendamentos",
+                to=settings.AUTH_USER_MODEL,
+            ),
             preserve_default=False,
         ),
     ]

@@ -1,10 +1,14 @@
 from django.contrib.auth.models import User
+from rest_framework import generics, permissions
+
 from agenda.models import Agendamento
 from agenda.serializers import AgendamentoSerializer, PrestadorSerializer
-from rest_framework import generics, permissions
+
 # Create your views here.
 
-class IsOwnerOrCreateOnly(permissions.BasePermission):# /api/agendamentos/?username=flooijdt
+
+# /api/agendamentos/?username=flooijdt
+class IsOwnerOrCreateOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "POST":
             return True
@@ -13,31 +17,48 @@ class IsOwnerOrCreateOnly(permissions.BasePermission):# /api/agendamentos/?usern
             return True
         return False
 
+
 class IsPrestador(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if obj.prestador == request.user:
             return True
         return False
 
-class AgendamentoList(generics.ListCreateAPIView):#/api/agendamentos/
+
+class AgendamentoList(generics.ListCreateAPIView):  # /api/agendamentos/
     serializer_class = AgendamentoSerializer
     permission_classes = [IsOwnerOrCreateOnly]
-    
+
     def get_queryset(self):
+        # Aqui a grafia de True e False deve ser capitalizada. nào consegui implementar a grafia minúscula (true, false)
         username = self.request.query_params.get("username", None)
         confirmado = self.request.query_params.get("confirmado", None)
-        queryset = Agendamento.objects.filter(prestador__username=username, confirmado=confirmado)
-        return queryset
 
-class AgendamentoDetail(generics.RetrieveUpdateDestroyAPIView):#/api/agendamentos/?username=flooijdt
-   permission_classes = [IsPrestador]
-   queryset = Agendamento.objects.all()
-   serializer_class = AgendamentoSerializer
+        if confirmado == False:
+            queryset = Agendamento.objects.filter(
+                prestador__username=username, confirmado=confirmado
+            )
+            return queryset
+
+        else:
+            queryset = Agendamento.objects.filter(prestador__username=username)
+            return queryset
+
+
+# /api/agendamentos/?username=flooijdt
+class AgendamentoDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsPrestador]
+    queryset = Agendamento.objects.all()
+    serializer_class = AgendamentoSerializer
+
+
 #    permission_classes = [IsOwnerOrCreateOnly]
+
 
 class PrestadorList(generics.ListAPIView):
     serializer_class = PrestadorSerializer
     queryset = User.objects.all()
+
 
 # @api_view(http_method_names=["GET", "PATCH", "DELETE"])
 # def agendamento_detail(request, id):
@@ -64,7 +85,7 @@ class PrestadorList(generics.ListAPIView):
 #         qs = Agendamento.objects.all().filter(cancelado=False)
 #         serializer = AgendamentoSerializer(qs, many=True)
 #         return JsonResponse(serializer.data, safe=False)
-    
+
 #     if request.method == "POST":
 #         data = request.data # {"nome_cliente": "table"...}
 #         serializer = AgendamentoSerializer(data=data)
