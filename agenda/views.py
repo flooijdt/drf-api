@@ -34,7 +34,7 @@ class AgendamentoList(generics.ListCreateAPIView):  # /api/agendamentos/
         username = self.request.query_params.get("username", None)
         confirmado = self.request.query_params.get("confirmado", None)
 
-        if confirmado == False:
+        if confirmado:
             queryset = Agendamento.objects.filter(
                 prestador__username=username, confirmado=confirmado
             )
