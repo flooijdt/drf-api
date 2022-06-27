@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import generics, permissions
-
+from datetime import date
 from agenda.models import Agendamento
 from agenda.serializers import AgendamentoSerializer, PrestadorSerializer
 
@@ -33,12 +33,21 @@ class AgendamentoList(generics.ListCreateAPIView):  # /api/agendamentos/
         # Aqui a grafia de True e False deve ser capitalizada. nào consegui implementar a grafia minúscula (true, false)
         username = self.request.query_params.get("username", None)
         confirmado = self.request.query_params.get("confirmado", None)
+        # data_horario = self.request.query_params.get("data_horario.date()", None)
 
         if confirmado:
             queryset = Agendamento.objects.filter(
-                prestador__username=username, confirmado=confirmado
+                prestador__username=username,
+                confirmado=confirmado,
             )
             return queryset
+
+        # if data_horario:
+        #     queryset = Agendamento.objects.filter(
+        #         prestador__username=username,
+        #         data_horario=data_horario.date(),
+        #     )
+        #     return queryset
 
         else:
             queryset = Agendamento.objects.filter(prestador__username=username)
