@@ -6,15 +6,19 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import mixins, generics
+
 # Create your views here.
 
-class AgendamentoDetail(generics.RetrieveUpdateDestroyAPIView):#/api/agendamentos/pk/
+
+class AgendamentoDetail(generics.RetrieveUpdateDestroyAPIView):  # /api/agendamentos/pk/
     queryset = Agendamento.objects.all()
     serializer_class = AgendamentoSerializer
 
-class AgendamentoList(generics.ListCreateAPIView):#/api/agendamentos/
+
+class AgendamentoList(generics.ListCreateAPIView):  # /api/agendamentos/
     queryset = Agendamento.objects.all()
     serializer_class = AgendamentoSerializer
+
 
 # @api_view(http_method_names=["GET", "PATCH", "DELETE"])
 # def agendamento_detail(request, id):
@@ -41,7 +45,7 @@ class AgendamentoList(generics.ListCreateAPIView):#/api/agendamentos/
 #         qs = Agendamento.objects.all().filter(cancelado=False)
 #         serializer = AgendamentoSerializer(qs, many=True)
 #         return JsonResponse(serializer.data, safe=False)
-    
+
 #     if request.method == "POST":
 #         data = request.data # {"nome_cliente": "table"...}
 #         serializer = AgendamentoSerializer(data=data)
